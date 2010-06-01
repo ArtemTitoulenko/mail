@@ -134,7 +134,7 @@ module Mail
       raise ArgumentError.new("Mail::Retrievable#pop3_start takes a block") unless block_given?
     
       pop3 = Net::POP3.new(settings[:address], settings[:port], isapop = false)
-      pop3.enable_ssl(verify = OpenSSL::SSL::VERIFY_NONE) if settings[:enable_ssl]
+      pop3.enable_ssl(OpenSSL::SSL::VERIFY_NONE) if settings[:enable_ssl]
       pop3.start(settings[:user_name], settings[:password])
     
       yield pop3
@@ -145,13 +145,16 @@ module Mail
       end
     end
     
-    #beta, kinda from spec
-    def delete_message(id)
+    #beta, mostly from spec
+    def delete_message(letter)
       start do |pop|
-        letter = find({:id => id, :count => 1})
-        File.open("inbox/#{id}",'w') do |f|
-          f.write letter.pop
-          letter = nil
+        if letter
+          File.open("inbox/#{letter.message_id}",'w') do |f|
+            f.write letter.pop
+          end
+          letter.delete
+        else
+          puts "Letter is invalid."
         end
       end
     end
