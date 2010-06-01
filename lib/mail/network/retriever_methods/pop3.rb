@@ -144,6 +144,34 @@ module Mail
         pop3.finish
       end
     end
+    
+    #beta, kinda from spec
+    def delete_message(id)
+      start do |pop|
+        letter = find({:id => id, :count => 1})
+        File.open("inbox/#{id}",'w') do |f|
+          f.write letter.pop
+          letter = nil
+        end
+      end
+    end
+    
+    #beta, straight from spec
+    def delete_all_messages()
+      start do |pop|
+        if pop.mails.empty?
+          puts 'No mail.'
+        else
+          i = 1
+          pop.delete_all do |m|
+            File.open("inbox/#{i}", 'w') do |f|
+              f.write m.pop
+            end
+            i += 1
+          end
+        end
+      end
+    end
   
   end
 end
